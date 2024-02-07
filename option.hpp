@@ -14,49 +14,132 @@ using namespace std;
 //---------------------------------------------------------------------------
 //     classe vecteur
 //---------------------------------------------------------------------------
-class vecteur
+template <typename T>
+class Vecteur:public vector<T>
 {
-private :
-  int dim_;          // dimension du vecteur
+  public:
+    Vecteur(int d=0, const T& x=T())
+     {if(d>0) this->assign(d,x);}
+    void print(ostream& out) const
+    {
+        int d=this->size();
+        out<<"(";
+        for(int i=0;i<d-1;i++) out<<this->at(i)<<",";
+        out<<this->at(d-1)<<")";
+    }
+    const T& operator()(int i) const {return vector<T>::at(i-1);}
+    T& operator()(int i) {return vector<T>::at(i-1);}
 
-public:
-  double * val_;     // tableaux de valeurs
-  void init(int d);        //allocation
-  vecteur(int d=0, double v0=0); // dim et val constante
-  vecteur(const vecteur & v);    // constructeur par copie
-  int dim() const {return dim_;}
-  vecteur & operator =(const vecteur & v);
-  vecteur & operator =(const double &x);//
-  double  operator [](const int & i) const;//
-  double & operator [] (const int & i);//
-  double  operator () (const int & i) const;//
-  double & operator () (const int & i);//
-  friend ostream & operator<<(ostream & out, const vecteur & v);//
-  friend istream & operator>>(istream & in, const vecteur & v);//
-  vecteur operator() (const int &i, const int &j) const;//
-  vecteur& operator +=(const vecteur & v);//
-  vecteur& operator -=(const vecteur & v);//
-  vecteur& operator +=(const double& x);//
-  vecteur& operator -=(const double& x);//
-  vecteur& operator *=(const double& x);//
-  vecteur& operator /=(const double& x);//
+    Vecteur<T>& operator+=(const Vecteur<T>& v)
+    {
+        if(v.size()!=this->size()) stop("dimensions incompatible dans u+=v");
+        auto itv=v.begin();
+        for(auto it=this->begin();it!=this->end();++it, ++itv) *it+=*itv;
+        return *this;
+    }
+    Vecteur<T>& operator-=(const Vecteur<T>& v)
+    {
+        if(v.size()!=this->size()) stop("dimensions incompatible dans u-=v");
+        auto itv=v.begin();
+        for(auto it=this->begin();it!=this->end();++it, ++itv) *it-=*itv;
+        return *this;
+    }
+    Vecteur<T>& operator*=(const T& a)
+    {
+        for(auto it=this->begin();it!=this->end();++it) *it*=a;
+        return *this;
+    }
+    Vecteur<T>& operator/=(const T& a)
+    {
+         if(a==0) stop("division par zero dans u/=a");
+         for(auto it=this->begin();it!=this->end();++it) *it/=a;
+         return *this;
+    }
 };
-vecteur operator +(const vecteur& u);//
-vecteur operator -(const vecteur& u);//
-vecteur operator +(const vecteur& u,const vecteur& v);//
-vecteur operator +(const vecteur& u,const double& x);//
-vecteur operator +(const double& x,const vecteur& u);//
-vecteur operator -(const vecteur& u,const vecteur& v);//
-vecteur operator -(const vecteur& u,const double& x);//
-vecteur operator -(const double& x,const vecteur& u);//
-vecteur operator *(const vecteur& u,const double& x);//
-vecteur operator *(const double& x,const vecteur& u);//
-vecteur operator /(const vecteur& u,const double& x);//
-bool operator ==(const vecteur& u, const vecteur& v);//
-bool operator !=(const vecteur& u, const vecteur& v);//
-vecteur operator |(const vecteur& u,const vecteur& v);//
-vecteur operator ,(const vecteur& u,const vecteur& v);//
-istream & operator>>(istream & in, const vecteur & v);//
-ostream & operator <<(ostream & out, const vecteur & v);//
+
+template <typename T>
+ostream& operator<<(ostream& out, const Vecteur<T>& u)
+{
+    u.print(out);
+    return out;
+}
+// operations algebriques
+template <typename T>
+Vecteur<T> operator-(const Vecteur<T>& u)
+{
+    Vecteur<T> w=u;
+    return w*=-1;
+}
+template <typename T>
+Vecteur<T> operator+(const Vecteur<T>& u, const Vecteur<T>& v)
+{
+    Vecteur<T> w=u;
+    return w+=v;
+}
+template <typename T>
+Vecteur<T> operator-(const Vecteur<T>& u, const Vecteur<T>& v)
+{
+    Vecteur<T> w=u;
+    return w-=v;
+}
+template <typename T>
+Vecteur<T> operator*(const Vecteur<T>& u, const T& a)
+{
+    Vecteur<T> w=u;
+    return w*=a;
+}
+template <typename T>
+Vecteur<T> operator*(const T& a,const Vecteur<T>& u)
+{
+    Vecteur<T> w=u;
+    return w*=a;
+}
+template <typename T>
+Vecteur<T> operator/(const Vecteur<T>& u, const T& a)
+{
+    Vecteur<T> w=u;
+    return w/=a;
+}
+// produit scalaire
+template <typename T>
+T operator|(const Vecteur<T>& u, const Vecteur<T>& v)
+{
+    if(u.size()!=v.size()) stop("dimensions incompatible dans u|v");
+    T ps=T();
+    auto itv=v.begin();
+    for(auto it=u.begin();it!=u.end();++it,++itv) ps+=(*it)*(*itv);
+    return ps;
+}
+//---------------------------------------------------------------------------
+//     classe Matrice
+//---------------------------------------------------------------------------
+class matrice
+{
+  private:
+    vector<pair <int,int>> indexes; 
+    Vecteur<double> valeurs;//coeficients de la matrice
+    int dim; //dimension de la matrice
+
+  public:
+    matrice(vector<pair <int,int>> indexes,Vecteur<double> valeurs,int dim);
+    int val(int i,int j)const;
+    Vecteur<double>& matix_vector(const Vecteur<double>& v);
+
+
+};
+
+class matrice_symetrique:public matrice
+{
+  private:
+
+  public:
+
+};
+class matrice_Nonsymetrique:public matrice
+{
+  private:
+
+  public:
+};
 
 #endif // OPTION_HPP_INCLUDED
