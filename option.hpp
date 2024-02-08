@@ -27,6 +27,9 @@ class Vecteur:public vector<T>
         for(int i=0;i<d-1;i++) out<<this->at(i)<<",";
         out<<this->at(d-1)<<")";
     }
+    int get_dim()const{
+        return this->size();
+    }
     const T& operator()(int i) const {return vector<T>::at(i-1);}
     T& operator()(int i) {return vector<T>::at(i-1);}
 
@@ -123,12 +126,23 @@ class matrice
 
   public:
     matrice(vector<pair <int,int>> indexes,Vecteur<double> valeurs,int dim);
+    matrice() : dim(0) {}
     int val(int i,int j)const;
     Vecteur<double> matrix_vector(const Vecteur<double>& v);
-    void print() const;
+    void print(std::ostream &out=std::cout) const;
+    friend std::ostream &operator<<(std::ostream &out, const matrice &mat);
+    matrice& operator=(const matrice& other);
+    matrice& operator+=(const matrice& mat);
+    matrice& operator*=(const double alpha);
+    matrice& operator-=(const matrice& mat);
+    matrice& operator/=(const double alpha);
 
 
 };
+matrice operator+(const matrice& mat1, const matrice& mat2);
+matrice operator-(const matrice& mat1, const matrice& mat2);
+matrice operator*(double alpha, const matrice& mat);
+matrice operator/(double alpha, const matrice& mat);
 
 class matrice_symetrique:public matrice
 {
