@@ -32,14 +32,14 @@ class Vecteur:public vector<T>
 
     Vecteur<T>& operator+=(const Vecteur<T>& v)
     {
-        if(v.size()!=this->size()) stop("dimensions incompatible dans u+=v");
+        if(v.size()!=this->size()) exit("dimensions incompatible dans u+=v");
         auto itv=v.begin();
         for(auto it=this->begin();it!=this->end();++it, ++itv) *it+=*itv;
         return *this;
     }
     Vecteur<T>& operator-=(const Vecteur<T>& v)
     {
-        if(v.size()!=this->size()) stop("dimensions incompatible dans u-=v");
+        if(v.size()!=this->size()) exit("dimensions incompatible dans u-=v");
         auto itv=v.begin();
         for(auto it=this->begin();it!=this->end();++it, ++itv) *it-=*itv;
         return *this;
@@ -51,7 +51,7 @@ class Vecteur:public vector<T>
     }
     Vecteur<T>& operator/=(const T& a)
     {
-         if(a==0) stop("division par zero dans u/=a");
+         if(a==0) exit("division par zero dans u/=a");
          for(auto it=this->begin();it!=this->end();++it) *it/=a;
          return *this;
     }
@@ -104,7 +104,7 @@ Vecteur<T> operator/(const Vecteur<T>& u, const T& a)
 template <typename T>
 T operator|(const Vecteur<T>& u, const Vecteur<T>& v)
 {
-    if(u.size()!=v.size()) stop("dimensions incompatible dans u|v");
+    if(u.size()!=v.size()) exit("dimensions incompatible dans u|v");
     T ps=T();
     auto itv=v.begin();
     for(auto it=u.begin();it!=u.end();++it,++itv) ps+=(*it)*(*itv);
@@ -112,6 +112,7 @@ T operator|(const Vecteur<T>& u, const Vecteur<T>& v)
 }
 //---------------------------------------------------------------------------
 //     classe Matrice
+//    This is a class to represent matrix using indexes (index of nonzero values) values , and dim
 //---------------------------------------------------------------------------
 class matrice
 {
@@ -123,7 +124,8 @@ class matrice
   public:
     matrice(vector<pair <int,int>> indexes,Vecteur<double> valeurs,int dim);
     int val(int i,int j)const;
-    Vecteur<double>& matix_vector(const Vecteur<double>& v);
+    Vecteur<double> matrix_vector(const Vecteur<double>& v);
+    void print() const;
 
 
 };
