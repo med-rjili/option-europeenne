@@ -145,8 +145,8 @@ matrice& matrice::operator/=(const double alpha){
 
 matrice operator+(const matrice& mat1, const matrice& mat2)
 {
-    matrice res=mat1;
-    return res+=mat2;
+  matrice res=mat1;
+  return res+=mat2;
 }
 matrice operator-(const matrice& mat1, const matrice& mat2){
   matrice res=mat1;
@@ -156,7 +156,7 @@ matrice operator*( double alpha, const matrice& mat){
   matrice res=mat;
   return res*=alpha;
 }
-matrice operator/(double alpha, const matrice& mat){
+matrice operator/(const matrice& mat,double alpha){
   matrice res=mat;
   return res/=alpha;
 }

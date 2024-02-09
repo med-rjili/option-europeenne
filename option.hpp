@@ -142,7 +142,7 @@ class matrice
 matrice operator+(const matrice& mat1, const matrice& mat2);
 matrice operator-(const matrice& mat1, const matrice& mat2);
 matrice operator*(double alpha, const matrice& mat);
-matrice operator/(double alpha, const matrice& mat);
+matrice operator/(const matrice& mat,double alpha);
 
 class matrice_symetrique:public matrice
 {
