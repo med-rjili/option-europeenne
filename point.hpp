@@ -1,5 +1,7 @@
-#include <iostream>
+#ifndef POINT_HPP_INCLUDED
+#define POINT_HPP_INCLUDED
 
+#include <iostream>
 
 using namespace std;
 
@@ -22,3 +24,5 @@ Point operator+(const Point& pt1, const Point& pt2);
 Point operator-(const Point& pt1, const Point& pt2);
 Point operator*(double alpha, const Point& pt);
 Point operator/(const Point& pt,double alpha);
+
+#endif
