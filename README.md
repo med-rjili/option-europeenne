@@ -11,10 +11,10 @@ The project aims to implement a simulation of European options, which are financ
 - **European Option Class**: Implementation of a class to represent European options, including attributes such as underlying asset price, strike price, expiration date, volatility, and interest rate.
 - **Finite Element Methods**: Application of finite element methods to discretize and solve option pricing differential equations.
 
-## Installation
+## running
 
-Clone the repository to your local machine:
+to run project:
 
 ```bash
-git clone https://github.com/med-rjili/option-europeenne
+g++ -o test main.cpp option.cpp point.cpp && ./test
 ```
