@@ -1,7 +1,9 @@
 #include "point.hpp"
 
 using namespace std;
-
+//------------------------------------------------------
+//                  class point
+//------------------------------------------------------
 
 
 Point::Point(double x,double y):x(x),y(y){}
