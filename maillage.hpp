@@ -5,7 +5,8 @@
 #include <iostream>
 #include "point.hpp"
 #include "triangle.hpp"
-#include "option.hpp"
+#include "matrice.hpp"
+#include "vecteur.hpp"
 #include <vector>
 
 using namespace std;

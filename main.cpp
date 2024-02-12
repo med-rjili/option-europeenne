@@ -6,12 +6,12 @@ using namespace std;
 
 int main()
 {
-    vector<pair<int, int>> indexes = { {0, 0}, {0, 1}, {1, 0}};
-    Vecteur<double> valeurs(3,4);
-    Vecteur<double> b(2, 2);
+    vector<pair<int, int>> indexes = { {0, 0},{1, 0},{2,0},{3,0},{4,0},{2,1},{2,2},{2,3},{2,4}};
+    Vecteur<double> valeurs(9,1);
+    Vecteur<double> b(5,2);
 
     // Assuming `matrice` constructor now takes `std::vector` instead of `Vecteur`
-    matrice A(indexes, valeurs, 2);
+    matrice A(indexes, valeurs, 5);
     matrice L, U;
     cout<<"A = \n"<<A<<endl;
     tie(L, U) = A.factorisationLU();
