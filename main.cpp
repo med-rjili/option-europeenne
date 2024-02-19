@@ -11,7 +11,14 @@ int main()
     Vecteur<double> b(5,2);
 
     // Assuming `matrice` constructor now takes `std::vector` instead of `Vecteur`
-    matrice A(indexes, valeurs, 5);
+    matrice A(indexes, valeurs, 7,5);
+    cout<<"A = \n"<<A<<endl;
+    cout<<b<<endl;
+    cout<<A*b<<endl;
+
+
+    /*
+    
     matrice L, U;
     cout<<"A = \n"<<A<<endl;
     tie(L, U) = A.factorisationLU();
@@ -20,6 +27,8 @@ int main()
     cout << "matrice L:\n" << L << endl;
     cout << "matrice U:\n" << U << endl;
     cout << "La solution du système LUX=b est:\n" << X << endl;
+
+    */
 
     return 0;
 }
