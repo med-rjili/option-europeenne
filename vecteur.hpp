@@ -1,122 +1,150 @@
 #ifndef VECTEUR_HPP_INCLUDED
 #define VECTEUR_HPP_INCLUDED
+
 #include <iostream>
-#include <fstream>
 #include <vector>
-#include <list>
-#include <map>
-#include <tuple>
-#include <utility>
 #include <cstdlib>
-#include <ctime>
-#include <math.h>
-using namespace std;
-//---------------------------------------------------------------------------
-//     classe vecteur
-//---------------------------------------------------------------------------
+
 template <typename T>
-class Vecteur:public vector<T>
+class Vecteur : public std::vector<T>
 {
-  public:
-    Vecteur(int d=0, const T& x=T())
-     {if(d>0) this->assign(d,x);}
-    void print(ostream& out) const
+public:
+    Vecteur(int d = 0, const T &x = T())
     {
-        int d=this->size();
-        out<<"(";
-        for(int i=0;i<d-1;i++) out<<this->at(i)<<",";
-        out<<this->at(d-1)<<")";
+        if (d > 0)
+            this->assign(d, x);
     }
-    int get_dim()const{
+
+    void print(std::ostream &out) const
+    {
+        int d = this->size();
+        out << "(";
+        for (int i = 0; i < d - 1; i++)
+            out << this->at(i) << ",";
+        out << this->at(d - 1) << ")";
+    }
+
+    int get_dim() const
+    {
         return this->size();
     }
-    const T& operator()(int i) const {return vector<T>::at(i-1);}
-    T& operator()(int i) {return vector<T>::at(i-1);}
 
-    Vecteur<T>& operator+=(const Vecteur<T>& v)
+    const T &operator()(int i) const
     {
-        if(v.size()!=this->size()) exit("dimensions incompatible dans u+=v");
-        auto itv=v.begin();
-        for(auto it=this->begin();it!=this->end();++it, ++itv) *it+=*itv;
+        return this->at(i - 1);
+    }
+
+    T &operator()(int i)
+    {
+        return this->at(i - 1);
+    }
+
+    Vecteur<T> &operator+=(const Vecteur<T> &v)
+    {
+        if (v.size() != this->size())
+            exit(EXIT_FAILURE);
+        auto itv = v.begin();
+        for (auto it = this->begin(); it != this->end(); ++it, ++itv)
+            *it += *itv;
         return *this;
     }
-    Vecteur<T>& operator-=(const Vecteur<T>& v)
+
+    Vecteur<T> &operator-=(const Vecteur<T> &v)
     {
-        if(v.size()!=this->size()) exit("dimensions incompatible dans u-=v");
-        auto itv=v.begin();
-        for(auto it=this->begin();it!=this->end();++it, ++itv) *it-=*itv;
+        if (v.size() != this->size())
+            exit(EXIT_FAILURE);
+        auto itv = v.begin();
+        for (auto it = this->begin(); it != this->end(); ++it, ++itv)
+            *it -= *itv;
         return *this;
     }
-    Vecteur<T>& operator*=(const T& a)
+
+    Vecteur<T> &operator*=(const T &a)
     {
-        for(auto it=this->begin();it!=this->end();++it) *it*=a;
+        for (auto it = this->begin(); it != this->end(); ++it)
+            *it *= a;
         return *this;
     }
-    Vecteur<T>& operator/=(const T& a)
+
+    Vecteur<T> &operator/=(const T &a)
     {
-         if(a==0) exit("division par zero dans u/=a");
-         for(auto it=this->begin();it!=this->end();++it) *it/=a;
-         return *this;
+        if (a == 0)
+            exit(EXIT_FAILURE);
+        for (auto it = this->begin(); it != this->end(); ++it)
+            *it /= a;
+        return *this;
+    }
+
+    Vecteur<T> &operator=(const Vecteur<T> &other)
+    {
+        if (this != &other)
+        {
+            this->clear();
+            this->insert(this->begin(), other.begin(), other.end());
+        }
+        return *this;
     }
 };
 
 template <typename T>
-ostream& operator<<(ostream& out, const Vecteur<T>& u)
+std::ostream &operator<<(std::ostream &out, const Vecteur<T> &u)
 {
     u.print(out);
     return out;
 }
-// operations algebriques
+
 template <typename T>
-Vecteur<T> operator-(const Vecteur<T>& u)
+Vecteur<T> operator-(const Vecteur<T> &u)
 {
-    Vecteur<T> w=u;
-    return w*=-1;
+    Vecteur<T> w = u;
+    return w *= -1;
 }
+
 template <typename T>
-Vecteur<T> operator+(const Vecteur<T>& u, const Vecteur<T>& v)
+Vecteur<T> operator+(const Vecteur<T> &u, const Vecteur<T> &v)
 {
-    Vecteur<T> w=u;
-    return w+=v;
+    Vecteur<T> w = u;
+    return w += v;
 }
+
 template <typename T>
-Vecteur<T> operator-(const Vecteur<T>& u, const Vecteur<T>& v)
+Vecteur<T> operator-(const Vecteur<T> &u, const Vecteur<T> &v)
 {
-    Vecteur<T> w=u;
-    return w-=v;
+    Vecteur<T> w = u;
+    return w -= v;
 }
+
 template <typename T>
-Vecteur<T> operator*(const Vecteur<T>& u, const T& a)
+Vecteur<T> operator*(const Vecteur<T> &u, const T &a)
 {
-    Vecteur<T> w=u;
-    return w*=a;
+    Vecteur<T> w = u;
+    return w *= a;
 }
+
 template <typename T>
-Vecteur<T> operator*(const T& a,const Vecteur<T>& u)
+Vecteur<T> operator*(const T &a, const Vecteur<T> &u)
 {
-    Vecteur<T> w=u;
-    return w*=a;
+    Vecteur<T> w = u;
+    return w *= a;
 }
+
 template <typename T>
-Vecteur<T> operator/(const Vecteur<T>& u, const T& a)
+Vecteur<T> operator/(const Vecteur<T> &u, const T &a)
 {
-    Vecteur<T> w=u;
-    return w/=a;
+    Vecteur<T> w = u;
+    return w /= a;
 }
-// produit scalaire
+
 template <typename T>
-T operator|(const Vecteur<T>& u, const Vecteur<T>& v)
+T operator|(const Vecteur<T> &u, const Vecteur<T> &v)
 {
-    if(u.size()!=v.size()) exit("dimensions incompatible dans u|v");
-    T ps=T();
-    auto itv=v.begin();
-    for(auto it=u.begin();it!=u.end();++it,++itv) ps+=(*it)*(*itv);
+    if (u.size() != v.size())
+        exit(EXIT_FAILURE);
+    T ps = T();
+    auto itv = v.begin();
+    for (auto it = u.begin(); it != u.end(); ++it, ++itv)
+        ps += (*it) * (*itv);
     return ps;
 }
-//---------------------------------------------------------------------------
-//     classe Matrice
-//    This is a class to represent matrix using indexes (index of nonzero values) values , and dim
-//---------------------------------------------------------------------------
 
-
-#endif // OPTION_HPP_INCLUDED
+#endif // VECTEUR_HPP_INCLUDED

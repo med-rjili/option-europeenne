@@ -3,7 +3,7 @@
 matrice::matrice(std::vector<std::pair<int, int>> indexes, Vecteur<double> valeurs, int rows, int cols)
     : indexes(indexes), valeurs(valeurs), rows(rows), cols(cols) {}
 
-int matrice::val(int i, int j) const
+double matrice::val(int i, int j) const
 {
     for (int k = 0; k < indexes.size(); k++)
     {
@@ -12,7 +12,17 @@ int matrice::val(int i, int j) const
     }
     return 0;
 }
-
+matrice:: matrice(int rows,int cols): rows{rows}, cols{cols} {}
+matrice::matrice(int rows, int cols, double val): rows{rows},cols{cols} {
+  for(int i=0;i<rows;i++){
+    for(int j=0;j<cols;j++){
+      if(val!=0.0){
+        indexes.push_back(std::pair<int,int> (i,j));
+        valeurs.push_back(val);
+      }
+    }
+  }
+}
 Vecteur<double> matrice::matrix_vector(const Vecteur<double> &v) const
 {
     Vecteur<double> result(rows, 0);
@@ -149,7 +159,7 @@ matrice &matrice::operator-=(const matrice &mat)
         if (it != mp.end())
         {
             mp[mat.indexes[i]] -= mat.valeurs[i];
-            if (mp[indexes[i]] == 0)
+            if (mp[mat.indexes[i]] == 0)
                 mp.erase(mat.indexes[i]);
         }
         else
@@ -272,7 +282,7 @@ std::pair<matrice, matrice> matrice::factorisationLU() const
             L.set(j, i, ((*this)(j, i) - sum) / U(i, i)); // Update L using previously computed L values and U
         }
     }
-    return {L, U};
+    return std::make_pair(L, U);
 }
 
 Vecteur<double> matrice::resoudre(const matrice &L, const matrice &U, const Vecteur<double> &b)
@@ -304,4 +314,15 @@ Vecteur<double> matrice::resoudre(const matrice &L, const matrice &U, const Vect
     }
 
     return x;
+}
+
+Vecteur<double> matrice::getRow(int row){
+    Vecteur<double> res(cols);
+    for(int i =0;i<indexes.size();i++){
+        if(indexes[i].first==row){
+            res[indexes[i].second]=valeurs[i];
+        }
+    }
+    return res;
+
 }

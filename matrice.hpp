@@ -17,8 +17,9 @@ private:
 public:
     matrice(std::vector<std::pair<int, int>> indexes, Vecteur<double> valeurs, int rows, int cols);
     matrice(){};
-    matrice(int rows,int cols): rows{rows}, cols{cols} {}
-    int val(int i, int j) const;
+    matrice(int rows,int cols);
+    matrice(int rows, int cols, double val);
+    double val(int i, int j) const;
     Vecteur<double> matrix_vector(const Vecteur<double> &v) const ;
     void print(std::ostream &out = std::cout) const;
     friend std::ostream &operator<<(std::ostream &out, const matrice &mat);
@@ -31,6 +32,7 @@ public:
     void set(int row, int col, double val);
     std::pair<matrice, matrice> factorisationLU() const;
     Vecteur<double> resoudre(const matrice &L, const matrice &U, const Vecteur<double> &b);
+    Vecteur<double> getRow(int row);
 };
 
 matrice operator+(const matrice &mat1, const matrice &mat2);
