@@ -4,6 +4,8 @@
 #include "vecteur.hpp"
 #include "matrice.hpp"
 
+vector<double> timeSlots(double t0, double tf, double dt);
+void output(string file_name,const matrice& M, const vector<double> T);
 matrice mat_cov();
 matrice A(const Point& p);
 Vecteur<double> V(const Point& p);

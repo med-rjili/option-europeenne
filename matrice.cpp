@@ -23,6 +23,12 @@ matrice::matrice(int rows, int cols, double val): rows{rows},cols{cols} {
     }
   }
 }
+int matrice::getNbRows(){
+    return rows;
+}
+int matrice::getNbCols(){
+    return cols;
+}
 Vecteur<double> matrice::matrix_vector(const Vecteur<double> &v) const
 {
     Vecteur<double> result(rows, 0);
@@ -285,9 +291,12 @@ std::pair<matrice, matrice> matrice::factorisationLU() const
     return std::make_pair(L, U);
 }
 
-Vecteur<double> matrice::resoudre(const matrice &L, const matrice &U, const Vecteur<double> &b)
+Vecteur<double> resoudre(const matrice &A,const Vecteur<double> &b)
 {
-    int n = L.rows;
+    std::pair< matrice,matrice> result_ = A.factorisationLU();
+    matrice L=result_.first;
+    matrice U=result_.second;
+    int n = L.getNbRows();
     Vecteur<double> y(n); // Pour stocker les solutions de Ly=b
     Vecteur<double> x(n); // Pour stocker les solutions de Ux=y
 
@@ -325,4 +334,10 @@ Vecteur<double> matrice::getRow(int row){
     }
     return res;
 
+}
+
+void matrice::setRow(int row,const Vecteur <double> &v){
+    for(int j=0;j<v.get_dim();j++){
+        this->set(row,j,v[j]);
+    } 
 }

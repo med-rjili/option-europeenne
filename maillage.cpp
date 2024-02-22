@@ -1,5 +1,7 @@
 #include "maillage.hpp"
 #include "point.hpp"
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -48,4 +50,16 @@ void Maillage::print()const{
         cout<<t<<" ";
     }
     cout<<endl;
+}
+
+void Maillage::Save (const char *fn) const
+{
+    ofstream os(fn) ;
+    os << "$Nodes" << endl;
+    os << points.size() << endl;
+    for (auto& p: points) p.print(os);
+    os << "$Elements" << endl;
+    os << triangles.size() << endl;
+    for (auto& num: triangles) num.print(os);
+    os.close() ;
 }

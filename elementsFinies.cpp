@@ -1,6 +1,30 @@
 #include "elementsFinies.hpp"
 #include <vector>
+#include <fstream>
 using namespace std;
+
+
+void output(string file_name,const matrice& M, const vector<double> T)
+{
+    ofstream out(file_name);
+    out << "$Time" << endl;
+    for (auto& t:T) out << t << " ";
+    out << endl << "$Solution" << endl;
+    M.print(out);
+}
+
+vector<double> timeSlots(double t0, double tf, double dt)
+{
+    vector<double> Time;
+    int steps = (int) (tf-t0)/dt;
+    cout<<"steps = "<<steps<<endl;
+    for (int i=0; i<=steps; i++) {    
+        Time.push_back(t0+i*dt);
+    }
+    if ((*Time.end())!= tf) Time.push_back(tf);
+    return Time;
+}
+
 matrice matM_el(const Point& S1, const Point& S2, const Point& S3)
 {
     //lecture des coordonnees de S1, S2, S3

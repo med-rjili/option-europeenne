@@ -21,6 +21,7 @@ class Maillage{
         void print() const;
         Maillage(int a,int b,int c,int d,int m,int n);
         void Maillage_rectangle(int a, int b,int c,int d);
+        void Save (const char *fn) const;
 
 
 

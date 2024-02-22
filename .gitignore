@@ -2,3 +2,6 @@ test
 bin
 obj
 .vscode
+Maillage.txt
+Solution.txt
+test-sfml.cpp
