@@ -16,6 +16,9 @@ void output(string file_name,const matrice& M, const vector<double> T)
 vector<double> timeSlots(double t0, double tf, double dt)
 {
     vector<double> Time;
+    cout<<"t0 = "<<t0<<endl;
+    cout<<"tf = "<<tf<<endl;
+    cout<<"dt = "<<dt<<endl;
     int steps = (int) (tf-t0)/dt;
     cout<<"steps = "<<steps<<endl;
     for (int i=0; i<=steps; i++) {    

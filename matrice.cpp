@@ -1,27 +1,16 @@
 #include "matrice.hpp"
-
-matrice::matrice(std::vector<std::pair<int, int>> indexes, Vecteur<double> valeurs, int rows, int cols)
-    : indexes(indexes), valeurs(valeurs), rows(rows), cols(cols) {}
-
-double matrice::val(int i, int j) const
-{
-    for (int k = 0; k < indexes.size(); k++)
-    {
-        if (indexes[k].first == i and indexes[k].second == j)
-            return valeurs[k];
-    }
-    return 0;
-}
+matrice::matrice(){};
 matrice:: matrice(int rows,int cols): rows{rows}, cols{cols} {}
 matrice::matrice(int rows, int cols, double val): rows{rows},cols{cols} {
-  for(int i=0;i<rows;i++){
-    for(int j=0;j<cols;j++){
-      if(val!=0.0){
-        indexes.push_back(std::pair<int,int> (i,j));
-        valeurs.push_back(val);
-      }
+    if (val!=0.0){
+        for(int i=0;i<rows;i++){
+            for(int j=0;j<cols;j++){
+                data[std::make_pair(i, j)]=val;
+            }
+        }
+
     }
-  }
+
 }
 int matrice::getNbRows(){
     return rows;
@@ -32,42 +21,26 @@ int matrice::getNbCols(){
 Vecteur<double> matrice::matrix_vector(const Vecteur<double> &v) const
 {
     Vecteur<double> result(rows, 0);
-    for (int i = 0; i < rows; i++)
+    for (const auto &entry : data)
     {
-        for (int j = 0; j < indexes.size(); j++)
-        {
-            if (indexes[j].first == i)
-            {
-                result[i] += valeurs[j] * v[indexes[j].second];
-            }
-        }
+        int i = entry.first.first;
+        int j = entry.first.second;
+        result[i] += entry.second * v[j];
     }
     return result;
 }
 
 void matrice::print(std::ostream &out) const
 {
-    std::map<std::pair<int, int>, double> mp;
-    bool exist[rows][cols] = {{false}};
-    for (int i = 0; i < indexes.size(); i++)
-    {
-        exist[indexes[i].first][indexes[i].second] = true;
-        mp[indexes[i]] = valeurs[i];
-    }
     for (int i = 0; i < rows; i++)
     {
         out << "(";
-        for (int j = 0; j < cols - 1; j++)
+        for (int j = 0; j < cols; j++)
         {
-            if (exist[i][j])
-                out << mp[std::pair<int, int>(i, j)] << " ";
-            else
-                out << "0 ";
+            if(j<cols-1)out << val(i, j) << " ";
+            else out<<val(i, j);
         }
-        if (exist[i][cols - 1])
-            out << mp[std::pair<int, int>(i, cols - 1)] << ")\n";
-        else
-            out << "0)\n";
+        out << ")\n";
     }
 }
 
@@ -81,8 +54,7 @@ matrice &matrice::operator=(const matrice &other)
 {
     if (this != &other)
     {
-        indexes = other.indexes;
-        valeurs = other.valeurs;
+        data = other.data;
         rows = other.rows;
         cols = other.cols;
     }
@@ -91,98 +63,70 @@ matrice &matrice::operator=(const matrice &other)
 
 matrice &matrice::operator+=(const matrice &mat)
 {
-    std::map<std::pair<int, int>, double> mp;
-    for (int i = 0; i < indexes.size(); i++)
+    for (const auto &entry : mat.data)
     {
-        auto it = mp.find(indexes[i]);
-        if (it != mp.end())
+        auto it = data.find(entry.first);
+        if (it != data.end())
         {
-            mp[indexes[i]] += valeurs[i];
-            if (mp[indexes[i]] == 0)
-                mp.erase(indexes[i]);
+            double sum = it->second + entry.second;
+            if (sum != 0.0)
+            {
+                it->second = sum;
+            }
+            else
+            {
+                data.erase(it);
+            }
         }
         else
         {
-            mp[indexes[i]] = valeurs[i];
+            if (entry.second != 0.0)
+            {
+                data[entry.first] = entry.second;
+            }
         }
     }
-    for (int i = 0; i < mat.indexes.size(); i++)
-    {
-        auto it = mp.find(mat.indexes[i]);
-        if (it != mp.end())
-        {
-            mp[mat.indexes[i]] += mat.valeurs[i];
-            if (mp[indexes[i]] == 0)
-                mp.erase(mat.indexes[i]);
-        }
-        else
-        {
-            mp[mat.indexes[i]] = mat.valeurs[i];
-        }
-    }
-    Vecteur<double> result_values(mp.size());
-    std::vector<std::pair<int, int>> result_indexes;
-    int idx = 0;
-    for (const auto &it : mp)
-    {
-        result_values[idx++] = it.second;
-        result_indexes.push_back(it.first);
-    }
-    valeurs = result_values;
-    indexes = result_indexes;
     return *this;
 }
 
 matrice &matrice::operator*=(const double alpha)
 {
-    for (int i = 0; i < valeurs.get_dim(); i++)
+    for (auto &entry : data)
     {
-        valeurs[i] *= alpha;
+        entry.second *= alpha;
+        if (entry.second == 0.0)
+        {
+            data.erase(entry.first);
+        }
     }
     return *this;
 }
 
 matrice &matrice::operator-=(const matrice &mat)
 {
-    std::map<std::pair<int, int>, double> mp;
-    for (int i = 0; i < indexes.size(); i++)
+    for (const auto &entry : mat.data)
     {
-        auto it = mp.find(indexes[i]);
-        if (it != mp.end())
+        auto it = data.find(entry.first);
+        if (it != data.end())
         {
-            mp[indexes[i]] += valeurs[i];
-            if (mp[indexes[i]] == 0)
-                mp.erase(indexes[i]);
+            double diff = it->second - entry.second;
+            if (diff != 0.0)
+            {
+                it->second = diff;
+            }
+            else
+            {
+                data.erase(it);
+            }
         }
         else
         {
-            mp[indexes[i]] = valeurs[i];
+            if (-entry.second != 0.0)
+            {
+                data[entry.first] = -entry.second;
+            }
         }
     }
-    for (int i = 0; i < mat.indexes.size(); i++)
-    {
-        auto it = mp.find(mat.indexes[i]);
-        if (it != mp.end())
-        {
-            mp[mat.indexes[i]] -= mat.valeurs[i];
-            if (mp[mat.indexes[i]] == 0)
-                mp.erase(mat.indexes[i]);
-        }
-        else
-        {
-            mp[mat.indexes[i]] = -mat.valeurs[i];
-        }
-    }
-    Vecteur<double> result_values(mp.size());
-    std::vector<std::pair<int, int>> result_indexes;
-    int idx = 0;
-    for (const auto &it : mp)
-    {
-        result_values[idx++] = it.second;
-        result_indexes.push_back(it.first);
-    }
-    valeurs = result_values;
-    indexes = result_indexes;
     return *this;
 }
 
@@ -190,11 +134,13 @@ matrice &matrice::operator/=(const double alpha)
 {
     if (alpha == 0)
     {
-        std::cout << "division by zero error !!" << std::endl;
+        std::cout << "Division by zero error!!" << std::endl;
         exit(-1);
     }
     else
+    {
         *this *= 1.0 / alpha;
+    }
     return *this;
 }
 
@@ -226,40 +172,33 @@ matrice operator/(const matrice &mat, double alpha)
     return res /= alpha;
 }
 
-double matrice::operator()(int row, int col) const
+double matrice::val(int i, int j) const
 {
-    for (int i = 0; i < indexes.size(); i++)
+    auto it = data.find(std::make_pair(i, j));
+    if (it != data.end())
     {
-        if (indexes[i].first == row and indexes[i].second == col)
-        {
-            return valeurs[i];
-        }
+        return it->second;
     }
     return 0.0;
+}
+double matrice::operator()(int row, int col) const
+{
+    return val(row, col);
 }
 
 void matrice::set(int row, int col, double val)
 {
-    for (int i = 0; i < indexes.size(); i++)
+    if (val == 0.0)
     {
-        if (indexes[i].first == row and indexes[i].second == col)
+        auto it = data.find(std::make_pair(row, col));
+        if (it != data.end())
         {
-            if (val == 0.0)
-            {
-                valeurs.erase(valeurs.begin() + i);
-                indexes.erase(indexes.begin() + i);
-            }
-            else
-            {
-                valeurs[i] = val;
-            }
-            return;
+            data.erase(it);
         }
     }
-    if (val != 0.0)
+    else
     {
-        indexes.push_back(std::pair<int, int>(row, col));
-        valeurs.push_back(val);
+        data[std::make_pair(row, col)] = val;
     }
 }
 
@@ -326,18 +265,18 @@ Vecteur<double> resoudre(const matrice &A,const Vecteur<double> &b)
 }
 
 Vecteur<double> matrice::getRow(int row){
-    Vecteur<double> res(cols);
-    for(int i =0;i<indexes.size();i++){
-        if(indexes[i].first==row){
-            res[indexes[i].second]=valeurs[i];
-        }
+    Vecteur<double> v(cols, 0);
+    for (int j = 0; j < cols; j++)
+    {
+        v[j] = val(row, j);
     }
-    return res;
+    return v;
 
 }
 
 void matrice::setRow(int row,const Vecteur <double> &v){
-    for(int j=0;j<v.get_dim();j++){
-        this->set(row,j,v[j]);
-    } 
+    for (int j = 0; j < cols; j++)
+    {
+        set(row, j, v[j]);
+    }
 }

@@ -9,16 +9,12 @@
 class matrice
 {
 private:
-    std::vector<std::pair<int, int>> indexes;
-    Vecteur<double> valeurs; // coefficients de la matrice
     std::map<std::pair<int, int>, double> data;
-
     int rows; // number of rows
     int cols; // number of columns
 
 public:
-    matrice(std::vector<std::pair<int, int>> indexes, Vecteur<double> valeurs, int rows, int cols);
-    matrice(){};
+    matrice();
     matrice(int rows,int cols);
     matrice(int rows, int cols, double val);
     double val(int i, int j) const;

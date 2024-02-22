@@ -35,7 +35,7 @@ int main()
     for (int l = 0; l < Nbtri; l++)
     {
         double r = (1.0 * l / Nbtri) * 100;
-        std::cout << "Calcul des matrices elements fini:" << round(r) << std::endl;
+        std::cout << "\rCalcul des matrices elements fini:" << round(r) <<"%"<< std::flush;
         Point S1 = Coorneu[Numtri[l].s1];
         Point S2 = Coorneu[Numtri[l].s2];
         Point S3 = Coorneu[Numtri[l].s3];
@@ -59,6 +59,7 @@ int main()
             }
         }
     }
+    cout<<"\n";
 
     // Shema numerique
     std::vector<double> Time = timeSlots(0, T, dt);
@@ -78,9 +79,10 @@ int main()
     for (int t = 1; t < steps; t++)
     {
         double r = (double(t + 1) / steps) * 100;
-        std::cout << "Calcul du schema numerique:" << round(r) << "%" << std::endl;
+        std::cout << "\rCalcul du schema numerique:" << round(r) << "%" <<  std::flush;
         P.setRow(t, resoudre((M + (dt / 2) * D), (M - (dt / 2) * D) * P.getRow(t - 1)));
     }
+    cout<<"\n";
 
     mc.Save("Maillage.txt");
     output("Solution.txt", P, Time);
@@ -116,10 +118,10 @@ int main()
     // Set the position of the point
     double initX=10;
     double initY=HEIGHT/2;
-    cout<<"max data = "<<maxi_data<<endl;
-    cout<<"max time = "<<maxi_time<<endl;
-    cout<<"time size = "<<time.size()<<endl;
-    cout<<"data size = "<<data.size()<<endl;
+    //cout<<"max data = "<<maxi_data<<endl;
+    //cout<<"max time = "<<maxi_time<<endl;
+    //cout<<"time size = "<<time.size()<<endl;
+    //cout<<"data size = "<<data.size()<<endl;
     double xScale=(WIDTH-40)/maxi_time;
     double yScale=(HEIGHT/2-10)/maxi_data;
 
@@ -138,9 +140,9 @@ int main()
         // Add the new point to the graph
         double x = initX + time[i] * xScale;  // Scale the x-coordinate
         double y = initY - data[i] * yScale; // Scale the y-coordinate
-        cout<<"data = "<<data[i]<<endl;
-        cout<<"x = "<<x<<endl;
-        cout<<"y = "<<y<<endl;
+        //cout<<"data = "<<data[i]<<endl;
+        //cout<<"x = "<<x<<endl;
+        //cout<<"y = "<<y<<endl;
         if(i>0) {
             double previousX = initX + time[i-1] * xScale;
             double previousY = initY - data[i-1] * yScale;
@@ -155,7 +157,7 @@ int main()
         window.display();
 
         // Wait for a short delay before updating the graph
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 
     // Keep the window open until closed by the user
