@@ -16,5 +16,15 @@ The project aims to implement a simulation of European options, which are financ
 to run project:
 
 ```bash
-g++ -o test main.cpp option.cpp point.cpp && ./test
+./myprogram
+```
+
+```bash
+./myprogram
+```
+
+## to clear
+
+```bash
+make clean
 ```

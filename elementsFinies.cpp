@@ -122,7 +122,7 @@ pair<vector<Point>, Vecteur<double>> quad_3()
 vector<Point> ref_transform(const vector<Point>& P,pair<matrice, Vecteur<double>> v)
 {
     vector<Point> res;
-    for (int i=0; i<P.size(); i++){
+    for (unsigned long i=0; i<P.size(); i++){
             Vecteur<double> pt(2), new_pt(2);
             pt[0]=P[i].x;
             pt[1]=P[i].y;

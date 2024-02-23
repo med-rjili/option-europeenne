@@ -3,7 +3,7 @@
 
 double max(std::vector<double> &v){
     double maxi = abs(v[0]);
-    for(int i=0;i<v.size();i++){
+    for(unsigned long i=0;i<v.size();i++){
         if (abs(v[i])> maxi){
             maxi = abs(v[i]);
         }

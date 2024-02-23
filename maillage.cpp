@@ -29,7 +29,7 @@ Maillage::Maillage(int a,int b,int c,int d,int m, int n):dimH(m+1),dimV(n+1){
 }
 void Maillage::Maillage_rectangle(int a,int b,int c,int d){
     Maillage_carre();
-    for(int i=0;i<points.size();i++)
+    for(unsigned long i=0;i<points.size();i++)
     {
        
         points[i].x=points[i].x*(b-a)+a;
