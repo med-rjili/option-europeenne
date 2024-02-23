@@ -16,7 +16,7 @@ The project aims to implement a simulation of European options, which are financ
 to run project:
 
 ```bash
-./myprogram
+make
 ```
 
 ```bash
