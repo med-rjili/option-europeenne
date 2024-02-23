@@ -17,9 +17,6 @@ to run project:
 
 ```bash
 make
-```
-
-```bash
 ./myprogram
 ```
 
