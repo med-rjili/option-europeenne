@@ -10,18 +10,24 @@
 #include "vecteur.hpp"
 #include "utils.hpp"
 
-int main()
-{
-    constexpr int m = 10, n = 10;
-    constexpr double a = 2.0;
-    constexpr double r = 0.05;
-    constexpr double K_ = 1;
-    constexpr double T = 365 * 2;
-    constexpr double dt = 3;
+const double HEIGHT=900;
+const double WIDTH=1200;
+
+
+int main(int argc, char *argv[]){
+
+    int m = 10, n = 10;
+    double a = 2.0;
+    double r = 0.05;
+    double K_ = 1;
+    double T = 365 * 2;
+    double dt = 3;
+
+    createQtInterface(argc, argv, &a, &r, &K_, &T, &dt);
     //constexpr double nbr_pas = T / dt;
 
     // Creation du maillage
-    std::cout << "Creation du maillage:";
+    //std::cout << "Creation du maillage:";
     Maillage mc(0, a, 0, a, m, n);
     mc.Save("Maillage.txt");
     long int Nbpts = mc.points.size(), Nbtri = mc.triangles.size();
@@ -34,8 +40,8 @@ int main()
 
     for (int l = 0; l < Nbtri; l++)
     {
-        double r = (1.0 * l / Nbtri) * 100;
-        std::cout << "\rCalcul des matrices elements fini:" << round(r) <<"%"<< std::flush;
+        //double r = (1.0 * l / Nbtri) * 100;
+        //std::cout << "\rCalcul des matrices elements fini:" << round(r) <<"%"<< std::flush;
         Point S1 = Coorneu[Numtri[l].s1];
         Point S2 = Coorneu[Numtri[l].s2];
         Point S3 = Coorneu[Numtri[l].s3];
@@ -59,7 +65,7 @@ int main()
             }
         }
     }
-    cout<<"\n";
+    //cout<<"\n";
 
     // Shema numerique
     std::vector<double> Time = timeSlots(0, T, dt);
@@ -76,14 +82,18 @@ int main()
     matrice D = r * M + K + B;
 
     P.setRow(0, Q_0);
-    for (int t = 1; t < steps; t++)
-    {
-        double r = (double(t + 1) / steps) * 100;
-        std::cout << "\rCalcul du schema numerique:" << round(r) << "%" <<  std::flush;
+    // Create a window
+    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "SFML Graph");
+    int t=1;
+    while (window.isOpen() and t<steps){
+        //double r = (double(t + 1) / steps) * 100;
+        //std::cout << "\rCalcul du schema numerique:" << round(r) << "%" <<  std::flush;
+        drawProgressBar(window,t, steps);
         P.setRow(t, resoudre((M + (dt / 2) * D), (M - (dt / 2) * D) * P.getRow(t - 1)));
+        t++;
     }
-    cout<<"\n";
-
+    //cout<<"\n";
+    window.clear();
     mc.Save("Maillage.txt");
     output("Solution.txt", P, Time);
 
@@ -103,14 +113,9 @@ int main()
         }
     }
 
-    const double HEIGHT=900;
-    const double WIDTH=1200;
+
     double maxi_data = max(data);
     double maxi_time=max(time);
-
-    // Create a window
-    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "SFML Graph");
-
 
     sf::CircleShape point(3); // Radius of 3 pixels
     point.setFillColor(sf::Color::Red); // Color of the point
@@ -221,7 +226,7 @@ int main()
         window.display();
 
         // Wait for a short delay before updating the graph
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(25));
     }
 
     // Keep the window open until closed by the user

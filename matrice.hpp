@@ -17,6 +17,7 @@ public:
     matrice();
     matrice(int rows,int cols);
     matrice(int rows, int cols, double val);
+    matrice(const matrice& other);
     double val(int i, int j) const;
     Vecteur<double> matrix_vector(const Vecteur<double> &v) const ;
     void print(std::ostream &out = std::cout) const;

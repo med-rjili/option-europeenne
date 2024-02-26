@@ -14,6 +14,9 @@ public:
         if (d > 0)
             this->assign(d, x);
     }
+    Vecteur(const Vecteur& other) : Vecteur(other.size()) {
+    *this = other;  // Call the copy assignment operator
+}
 
     void print(std::ostream &out) const
     {

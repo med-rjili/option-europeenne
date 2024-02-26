@@ -5,4 +5,5 @@ obj
 Maillage.txt
 Solution.txt
 test-sfml.cpp
-myprogram
+option-europeenne
+*.o

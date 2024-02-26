@@ -11,13 +11,28 @@ The project aims to implement a simulation of European options, which are financ
 - **European Option Class**: Implementation of a class to represent European options, including attributes such as underlying asset price, strike price, expiration date, volatility, and interest rate.
 - **Finite Element Methods**: Application of finite element methods to discretize and solve option pricing differential equations.
 
+## dependencies
+
+### QT
+
+Qt is cross-platform software for creating graphical user interfaces
+run `sudo apt install qt5-default` to install QT
+
+### SFML
+
+Simple and Fast Multimedia Library is a cross-platform software development library designed to provide a simple application programming interface to various multimedia components in computers.
+we used SFML to plot the graph of our results.
+
+run `sudo apt-get install libsfml-dev` to install SFML
+
 ## running
 
 to run project:
 
 ```bash
+qmake
 make
-./myprogram
+./option-europeenne
 ```
 
 ## to clear

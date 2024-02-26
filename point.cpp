@@ -10,6 +10,7 @@ Point::Point(double x,double y):x(x),y(y){}
 void Point::print(std::ostream &out)const{
     out<<"("<<x<<","<<y<<")";
 }
+Point::Point(const Point& other) : x(other.x), y(other.y) {} // Explicit copy constructor
 
 std::ostream &operator<<(std::ostream &out, const Point &pt) {
     pt.print(out);

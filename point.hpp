@@ -10,6 +10,7 @@ class Point {
     public:
         double x,y;
         Point (double x=0,double y=0);
+        Point(const Point& other);
         void print(std::ostream &out=std::cout) const;
         friend std::ostream &operator<<(std::ostream &out, const Point &pt);
         Point& operator=(const Point& other);

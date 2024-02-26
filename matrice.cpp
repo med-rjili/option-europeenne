@@ -12,6 +12,7 @@ matrice::matrice(int rows, int cols, double val): rows{rows},cols{cols} {
     }
 
 }
+matrice::matrice(const matrice& other) : data(other.data), rows(other.rows), cols(other.cols) {}
 int matrice::getNbRows(){
     return rows;
 }
