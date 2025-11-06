@@ -162,20 +162,24 @@ Greeks MonteCarloPricer::calculateGreeks(double base_price) {
     Greeks greeks;
     
     // Small perturbations for finite differences
-    double dS = 0.01 * params.S1_0;  // 1% of spot price
+    // Using adaptive step sizes based on parameter values
+    double dS = 0.01 * std::max(params.S1_0, params.S2_0);  // 1% of max spot price
     double dSigma = 0.01;            // 1% absolute change in volatility
     double dr = 0.0001;              // 1 basis point
-    double dt = 1.0 / 365.0;         // 1 day
+    double dt = std::min(1.0 / 365.0, params.T / 10.0);  // 1 day or 10% of time, whichever is smaller
+    
+    // Use different random seeds for each Greek calculation to avoid bias
+    unsigned int seed_base = rng();  // Get a new seed from the main RNG
     
     // Delta 1: sensitivity to S1
     OptionParams params_S1_up = params;
     params_S1_up.S1_0 += dS;
-    MonteCarloPricer pricer_S1_up(params_S1_up, num_simulations, 42);
+    MonteCarloPricer pricer_S1_up(params_S1_up, num_simulations, seed_base + 1);
     double price_S1_up = pricer_S1_up.computePriceAntithetic();
     
     OptionParams params_S1_down = params;
     params_S1_down.S1_0 -= dS;
-    MonteCarloPricer pricer_S1_down(params_S1_down, num_simulations, 42);
+    MonteCarloPricer pricer_S1_down(params_S1_down, num_simulations, seed_base + 2);
     double price_S1_down = pricer_S1_down.computePriceAntithetic();
     
     greeks.delta1 = (price_S1_up - price_S1_down) / (2 * dS);
@@ -183,12 +187,12 @@ Greeks MonteCarloPricer::calculateGreeks(double base_price) {
     // Delta 2: sensitivity to S2
     OptionParams params_S2_up = params;
     params_S2_up.S2_0 += dS;
-    MonteCarloPricer pricer_S2_up(params_S2_up, num_simulations, 42);
+    MonteCarloPricer pricer_S2_up(params_S2_up, num_simulations, seed_base + 3);
     double price_S2_up = pricer_S2_up.computePriceAntithetic();
     
     OptionParams params_S2_down = params;
     params_S2_down.S2_0 -= dS;
-    MonteCarloPricer pricer_S2_down(params_S2_down, num_simulations, 42);
+    MonteCarloPricer pricer_S2_down(params_S2_down, num_simulations, seed_base + 4);
     double price_S2_down = pricer_S2_down.computePriceAntithetic();
     
     greeks.delta2 = (price_S2_up - price_S2_down) / (2 * dS);
@@ -202,7 +206,7 @@ Greeks MonteCarloPricer::calculateGreeks(double base_price) {
     // Vega 1: sensitivity to sigma1
     OptionParams params_sigma1_up = params;
     params_sigma1_up.sigma1 += dSigma;
-    MonteCarloPricer pricer_sigma1_up(params_sigma1_up, num_simulations, 42);
+    MonteCarloPricer pricer_sigma1_up(params_sigma1_up, num_simulations, seed_base + 5);
     double price_sigma1_up = pricer_sigma1_up.computePriceAntithetic();
     
     greeks.vega1 = (price_sigma1_up - base_price) / dSigma;
@@ -210,7 +214,7 @@ Greeks MonteCarloPricer::calculateGreeks(double base_price) {
     // Vega 2: sensitivity to sigma2
     OptionParams params_sigma2_up = params;
     params_sigma2_up.sigma2 += dSigma;
-    MonteCarloPricer pricer_sigma2_up(params_sigma2_up, num_simulations, 42);
+    MonteCarloPricer pricer_sigma2_up(params_sigma2_up, num_simulations, seed_base + 6);
     double price_sigma2_up = pricer_sigma2_up.computePriceAntithetic();
     
     greeks.vega2 = (price_sigma2_up - base_price) / dSigma;
@@ -219,7 +223,7 @@ Greeks MonteCarloPricer::calculateGreeks(double base_price) {
     if (params.rho < 0.99) {
         OptionParams params_rho_up = params;
         params_rho_up.rho += 0.01;
-        MonteCarloPricer pricer_rho_up(params_rho_up, num_simulations, 42);
+        MonteCarloPricer pricer_rho_up(params_rho_up, num_simulations, seed_base + 7);
         double price_rho_up = pricer_rho_up.computePriceAntithetic();
         
         greeks.rho_greek = (price_rho_up - base_price) / 0.01;
@@ -231,7 +235,7 @@ Greeks MonteCarloPricer::calculateGreeks(double base_price) {
     if (params.T > dt) {
         OptionParams params_t_down = params;
         params_t_down.T -= dt;
-        MonteCarloPricer pricer_t_down(params_t_down, num_simulations, 42);
+        MonteCarloPricer pricer_t_down(params_t_down, num_simulations, seed_base + 8);
         double price_t_down = pricer_t_down.computePriceAntithetic();
         
         greeks.theta = (price_t_down - base_price) / dt;
@@ -242,7 +246,7 @@ Greeks MonteCarloPricer::calculateGreeks(double base_price) {
     // Rho (rate): sensitivity to interest rate
     OptionParams params_r_up = params;
     params_r_up.r += dr;
-    MonteCarloPricer pricer_r_up(params_r_up, num_simulations, 42);
+    MonteCarloPricer pricer_r_up(params_r_up, num_simulations, seed_base + 9);
     double price_r_up = pricer_r_up.computePriceAntithetic();
     
     greeks.rho_rate = (price_r_up - base_price) / dr;

@@ -559,8 +559,30 @@ void runMonteCarloVisualization(const OptionParams& params, int num_simulations)
     sf::RenderWindow window(sf::VideoMode(MC_WIDTH, MC_HEIGHT), "Monte Carlo Option Pricing");
     
     sf::Font font;
-    if (!font.loadFromFile("arial.ttf")) {
-        std::cerr << "Error loading font" << std::endl;
+    // Try multiple font paths for robustness
+    std::vector<std::string> font_paths = {
+        "arial.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/System/Library/Fonts/Helvetica.ttc",  // macOS
+        "C:\\Windows\\Fonts\\arial.ttf"  // Windows
+    };
+    
+    bool font_loaded = false;
+    for (const auto& path : font_paths) {
+        if (font.loadFromFile(path)) {
+            font_loaded = true;
+            std::cout << "Loaded font from: " << path << std::endl;
+            break;
+        }
+    }
+    
+    if (!font_loaded) {
+        std::cerr << "Error: Could not load any font. Tried:" << std::endl;
+        for (const auto& path : font_paths) {
+            std::cerr << "  - " << path << std::endl;
+        }
+        std::cerr << "Visualization will not work properly without fonts." << std::endl;
         return;
     }
     

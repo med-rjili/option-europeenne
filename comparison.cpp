@@ -14,6 +14,8 @@ std::vector<double> extractFEMPrices(const std::string& filename,
     
     if (!file.is_open()) {
         std::cerr << "Warning: Could not open " << filename << std::endl;
+        std::cerr << "Note: FEM comparison requires running the FEM solver first" << std::endl;
+        std::cerr << "      to generate Solution.txt. This is future work." << std::endl;
         return prices;
     }
     
@@ -43,16 +45,16 @@ std::vector<double> extractFEMPrices(const std::string& filename,
         }
         
         if (reading_solution) {
-            // Read solution matrix - this is a simplified version
-            // In practice, you'd need to parse the matrix format properly
-            // For now, we'll return empty to indicate FEM data needs to be integrated
+            // TODO: Read solution matrix - this requires proper parsing of the FEM output format
+            // The FEM solver would need to be run first to generate Solution.txt
+            // This is left as future work for integration
             break;
         }
     }
     
     file.close();
     
-    // Return empty for now - this would need proper integration with FEM output
+    // Return empty for now - FEM integration is future work
     return prices;
 }
 
