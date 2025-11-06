@@ -54,6 +54,10 @@ private:
     // Calculate payoff for the option
     double payoff(double S1, double S2);
     
+    // Internal pricing method without Greeks calculation
+    double computePrice();
+    double computePriceAntithetic();
+    
 public:
     MonteCarloPricer(const OptionParams& params, int num_simulations, unsigned int seed = 42);
     

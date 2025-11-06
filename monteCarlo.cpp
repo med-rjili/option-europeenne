@@ -40,6 +40,55 @@ double MonteCarloPricer::payoff(double S1, double S2) {
     return std::max(S1 + S2 - params.K, 0.0);
 }
 
+double MonteCarloPricer::computePrice() {
+    std::vector<double> payoffs(num_simulations);
+    
+    for (int i = 0; i < num_simulations; ++i) {
+        auto [Z1, Z2] = generateCorrelatedNormals(params.rho);
+        auto [S1_T, S2_T] = simulatePrices(Z1, Z2);
+        payoffs[i] = payoff(S1_T, S2_T);
+    }
+    
+    // Calculate mean
+    double sum = std::accumulate(payoffs.begin(), payoffs.end(), 0.0);
+    double mean = sum / num_simulations;
+    
+    // Discount to present value
+    double price = mean * std::exp(-params.r * params.T);
+    
+    return price;
+}
+
+double MonteCarloPricer::computePriceAntithetic() {
+    std::vector<double> payoffs(num_simulations);
+    
+    for (int i = 0; i < num_simulations / 2; ++i) {
+        // Generate correlated normals
+        auto [Z1, Z2] = generateCorrelatedNormals(params.rho);
+        
+        // Path 1: positive normals
+        auto [S1_T_pos, S2_T_pos] = simulatePrices(Z1, Z2);
+        double payoff_pos = payoff(S1_T_pos, S2_T_pos);
+        
+        // Path 2: antithetic (negative) normals
+        auto [S1_T_neg, S2_T_neg] = simulatePrices(-Z1, -Z2);
+        double payoff_neg = payoff(S1_T_neg, S2_T_neg);
+        
+        // Average the two payoffs
+        payoffs[2*i] = payoff_pos;
+        payoffs[2*i + 1] = payoff_neg;
+    }
+    
+    // Calculate mean
+    double sum = std::accumulate(payoffs.begin(), payoffs.end(), 0.0);
+    double mean = sum / num_simulations;
+    
+    // Discount to present value
+    double price = mean * std::exp(-params.r * params.T);
+    
+    return price;
+}
+
 MonteCarloResult MonteCarloPricer::priceOption() {
     std::vector<double> payoffs(num_simulations);
     
@@ -122,12 +171,12 @@ Greeks MonteCarloPricer::calculateGreeks(double base_price) {
     OptionParams params_S1_up = params;
     params_S1_up.S1_0 += dS;
     MonteCarloPricer pricer_S1_up(params_S1_up, num_simulations, 42);
-    double price_S1_up = pricer_S1_up.priceOption().price;
+    double price_S1_up = pricer_S1_up.computePriceAntithetic();
     
     OptionParams params_S1_down = params;
     params_S1_down.S1_0 -= dS;
     MonteCarloPricer pricer_S1_down(params_S1_down, num_simulations, 42);
-    double price_S1_down = pricer_S1_down.priceOption().price;
+    double price_S1_down = pricer_S1_down.computePriceAntithetic();
     
     greeks.delta1 = (price_S1_up - price_S1_down) / (2 * dS);
     
@@ -135,12 +184,12 @@ Greeks MonteCarloPricer::calculateGreeks(double base_price) {
     OptionParams params_S2_up = params;
     params_S2_up.S2_0 += dS;
     MonteCarloPricer pricer_S2_up(params_S2_up, num_simulations, 42);
-    double price_S2_up = pricer_S2_up.priceOption().price;
+    double price_S2_up = pricer_S2_up.computePriceAntithetic();
     
     OptionParams params_S2_down = params;
     params_S2_down.S2_0 -= dS;
     MonteCarloPricer pricer_S2_down(params_S2_down, num_simulations, 42);
-    double price_S2_down = pricer_S2_down.priceOption().price;
+    double price_S2_down = pricer_S2_down.computePriceAntithetic();
     
     greeks.delta2 = (price_S2_up - price_S2_down) / (2 * dS);
     
@@ -154,7 +203,7 @@ Greeks MonteCarloPricer::calculateGreeks(double base_price) {
     OptionParams params_sigma1_up = params;
     params_sigma1_up.sigma1 += dSigma;
     MonteCarloPricer pricer_sigma1_up(params_sigma1_up, num_simulations, 42);
-    double price_sigma1_up = pricer_sigma1_up.priceOption().price;
+    double price_sigma1_up = pricer_sigma1_up.computePriceAntithetic();
     
     greeks.vega1 = (price_sigma1_up - base_price) / dSigma;
     
@@ -162,7 +211,7 @@ Greeks MonteCarloPricer::calculateGreeks(double base_price) {
     OptionParams params_sigma2_up = params;
     params_sigma2_up.sigma2 += dSigma;
     MonteCarloPricer pricer_sigma2_up(params_sigma2_up, num_simulations, 42);
-    double price_sigma2_up = pricer_sigma2_up.priceOption().price;
+    double price_sigma2_up = pricer_sigma2_up.computePriceAntithetic();
     
     greeks.vega2 = (price_sigma2_up - base_price) / dSigma;
     
@@ -171,7 +220,7 @@ Greeks MonteCarloPricer::calculateGreeks(double base_price) {
         OptionParams params_rho_up = params;
         params_rho_up.rho += 0.01;
         MonteCarloPricer pricer_rho_up(params_rho_up, num_simulations, 42);
-        double price_rho_up = pricer_rho_up.priceOption().price;
+        double price_rho_up = pricer_rho_up.computePriceAntithetic();
         
         greeks.rho_greek = (price_rho_up - base_price) / 0.01;
     } else {
@@ -183,7 +232,7 @@ Greeks MonteCarloPricer::calculateGreeks(double base_price) {
         OptionParams params_t_down = params;
         params_t_down.T -= dt;
         MonteCarloPricer pricer_t_down(params_t_down, num_simulations, 42);
-        double price_t_down = pricer_t_down.priceOption().price;
+        double price_t_down = pricer_t_down.computePriceAntithetic();
         
         greeks.theta = (price_t_down - base_price) / dt;
     } else {
@@ -194,7 +243,7 @@ Greeks MonteCarloPricer::calculateGreeks(double base_price) {
     OptionParams params_r_up = params;
     params_r_up.r += dr;
     MonteCarloPricer pricer_r_up(params_r_up, num_simulations, 42);
-    double price_r_up = pricer_r_up.priceOption().price;
+    double price_r_up = pricer_r_up.computePriceAntithetic();
     
     greeks.rho_rate = (price_r_up - base_price) / dr;
     
@@ -210,7 +259,7 @@ std::vector<double> MonteCarloPricer::priceEvolution(int num_time_steps) {
         params_t.T = dt * (step + 1);
         
         MonteCarloPricer pricer(params_t, num_simulations, 42);
-        prices[step] = pricer.priceOption().price;
+        prices[step] = pricer.computePriceAntithetic();
     }
     
     return prices;
@@ -221,7 +270,7 @@ std::vector<std::pair<int, double>> MonteCarloPricer::convergenceAnalysis(const 
     
     for (int count : simulation_counts) {
         MonteCarloPricer pricer(params, count, 42);
-        double price = pricer.priceOption().price;
+        double price = pricer.computePriceAntithetic();
         results.push_back(std::make_pair(count, price));
     }
     
