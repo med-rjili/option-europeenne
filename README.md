@@ -71,12 +71,13 @@ Le domaine $\Omega = [0, a] \times [0, a]$ est décomposé en un **maillage tria
 - $m \times n$ nœuds régulièrement espacés
 - Triangulation de Delaunay pour assurer la qualité du maillage
 
-Sur chaque triangle $T_k$, on utilise des **fonctions de base linéaires** (éléments finis P1):
+Sur chaque triangle $T_k$, on utilise des **fonctions de base linéaires** (éléments finis P1). Pour un triangle avec sommets $S_1, S_2, S_3$, les trois fonctions de base $w_1, w_2, w_3$ sont définies par:
 
-$$w_i(x) = \begin{cases} 
-1 - \frac{x - x_1}{x_2 - x_1} - \frac{y - y_1}{y_3 - y_1} & \text{au sommet } i \\
-0 & \text{ailleurs}
-\end{cases}$$
+- $w_i(S_j) = \delta_{ij}$ (1 au sommet $i$, 0 aux autres sommets)
+- $w_i$ varie linéairement sur le triangle
+- $w_1 + w_2 + w_3 = 1$ (partition de l'unité)
+
+Ces fonctions sont appelées **coordonnées barycentriques** du triangle.
 
 ### 2. Matrices élémentaires
 
@@ -127,9 +128,11 @@ où:
 ### 5. Quadratures de Gauss
 
 #### Quadrature d'ordre 2 (3 points):
-Points de référence: $\hat{P}_1 = (1/6, 1/6)$, $\hat{P}_2 = (2/3, 1/6)$, $\hat{P}_3 = (1/6, 2/3)$
+Points de référence sur le triangle: $\hat{P}_1 = (1/6, 1/6)$, $\hat{P}_2 = (2/3, 1/6)$, $\hat{P}_3 = (1/6, 2/3)$
 
 Poids: $c_1 = c_2 = c_3 = 1/6$
+
+*Note: Ces poids incluent l'aire du triangle de référence (1/2). En notation standard, on utilise parfois $\omega_i = 1/3$ avec un facteur d'aire séparé.*
 
 #### Quadrature d'ordre 3 (4 points):
 Points de référence: $\hat{P}_1 = (1/3, 1/3)$, $\hat{P}_2 = (0.6, 0.2)$, $\hat{P}_3 = (0.2, 0.6)$, $\hat{P}_4 = (0.2, 0.2)$
@@ -235,8 +238,8 @@ Au lancement, une **interface Qt** permet de configurer:
 - **a**: Taille du domaine spatial [0, a] × [0, a] (défaut: 2.0)
 - **r**: Taux d'intérêt sans risque (défaut: 0.05)
 - **K_**: Prix d'exercice (strike) (défaut: 1.0)
-- **T**: Date d'échéance en jours (défaut: 730 jours = 2 ans)
-- **dt**: Pas de temps (défaut: 3 jours)
+- **T**: Date d'échéance en jours (défaut: 730 jours, soit 2 ans)
+- **dt**: Pas de temps en jours (défaut: 3 jours)
 
 Après configuration, cliquez sur **"Calculate"** pour lancer la simulation.
 
@@ -251,16 +254,16 @@ make clean
 
 ```
 option-europeenne/
-├── src/
-│   ├── *.cpp              # Fichiers sources C++
-│   ├── *.hpp              # Fichiers d'en-tête
+├── *.cpp                  # Fichiers sources C++
+├── *.hpp                  # Fichiers d'en-tête
 ├── arial.ttf              # Police pour l'affichage SFML
 ├── bg.jpg                 # Image de fond pour l'interface Qt
 ├── option_europeenne.pdf  # Énoncé du projet
 ├── README.md              # Ce fichier
 ├── Makefile               # Généré par qmake
 ├── option-europeenne.pro  # Fichier de configuration Qt
-└── bin/                   # Exécutable compilé
+├── bin/                   # Répertoire de l'exécutable compilé
+└── obj/                   # Fichiers objets intermédiaires
 ```
 
 ## Résultats
