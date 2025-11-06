@@ -7,7 +7,18 @@ SOURCES += main.cpp \
            triangle.cpp \
            matrice.cpp \
            elementsFinies.cpp \
+           monteCarlo.cpp \
+           monteCarloVisualization.cpp
 
+HEADERS += monteCarlo.hpp \
+           monteCarloVisualization.hpp \
+           elementsFinies.hpp \
+           maillage.hpp \
+           matrice.hpp \
+           point.hpp \
+           triangle.hpp \
+           utils.hpp \
+           vecteur.hpp
 
 LIBS += -lsfml-graphics \
         -lsfml-window \

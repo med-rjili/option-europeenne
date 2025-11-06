@@ -1,0 +1,50 @@
+# Makefile for Monte Carlo Option Pricing
+CXX = g++
+CXXFLAGS = -std=c++17 -Wall -O2
+LDFLAGS = -lsfml-graphics -lsfml-window -lsfml-system
+
+# Source files
+MC_SOURCES = monteCarlo.cpp monteCarloVisualization.cpp
+MC_OBJECTS = $(MC_SOURCES:.cpp=.o)
+
+# Targets
+all: montecarlo demo_montecarlo
+
+montecarlo: main_montecarlo.o $(MC_OBJECTS)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+
+demo_montecarlo: demo_montecarlo.o $(MC_OBJECTS) comparison.o
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+
+# Object file rules
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Dependencies
+main_montecarlo.o: main_montecarlo.cpp monteCarlo.hpp monteCarloVisualization.hpp
+demo_montecarlo.o: demo_montecarlo.cpp monteCarlo.hpp monteCarloVisualization.hpp comparison.hpp
+monteCarlo.o: monteCarlo.cpp monteCarlo.hpp vecteur.hpp
+monteCarloVisualization.o: monteCarloVisualization.cpp monteCarloVisualization.hpp monteCarlo.hpp
+comparison.o: comparison.cpp comparison.hpp monteCarlo.hpp
+
+# Clean
+clean:
+	rm -f *.o montecarlo demo_montecarlo MonteCarlo_*.txt
+
+# Phony targets
+.PHONY: all clean
+
+# Help
+help:
+	@echo "Available targets:"
+	@echo "  all               - Build all Monte Carlo programs"
+	@echo "  montecarlo        - Build interactive Monte Carlo visualizer"
+	@echo "  demo_montecarlo   - Build comprehensive demonstration"
+	@echo "  clean             - Remove compiled files"
+	@echo ""
+	@echo "Usage examples:"
+	@echo "  make              - Build everything"
+	@echo "  make montecarlo   - Build just the interactive program"
+	@echo "  make demo_montecarlo - Build just the demo"
+	@echo "  ./montecarlo      - Run interactive visualizer"
+	@echo "  ./demo_montecarlo - Run comprehensive demo"

@@ -1,9 +1,10 @@
-# Valorisation d'Options Européennes par la Méthode des Éléments Finis
+# Valorisation d'Options Européennes - Éléments Finis & Monte Carlo
 
 ## 📋 Table des matières
 - [Vue d'ensemble](#vue-densemble)
 - [Formulation mathématique](#formulation-mathématique)
 - [Méthode des éléments finis](#méthode-des-éléments-finis)
+- [Méthode de Monte Carlo](#méthode-de-monte-carlo)
 - [Implémentation](#implémentation)
 - [Dépendances](#dépendances)
 - [Installation et exécution](#installation-et-exécution)
@@ -12,7 +13,12 @@
 
 ## Vue d'ensemble
 
-Ce projet implémente la valorisation d'**options européennes à deux actifs sous-jacents** en utilisant la **méthode des éléments finis** pour résoudre l'équation aux dérivées partielles (EDP) de Black-Scholes. Le projet utilise C++ avec une approche orientée objet et propose une interface graphique interactive développée avec Qt et SFML.
+Ce projet implémente la valorisation d'**options européennes à deux actifs sous-jacents** en utilisant **deux méthodes complémentaires** :
+
+1. **Méthode des Éléments Finis (FEM)** : Résolution de l'équation aux dérivées partielles (EDP) de Black-Scholes
+2. **Méthode de Monte Carlo** : Simulation stochastique des prix des actifs corrélés suivant une loi log-normale
+
+Le projet utilise C++ avec une approche orientée objet et propose des interfaces graphiques interactives développées avec Qt et SFML pour la visualisation des résultats et des Greeks.
 
 ### Qu'est-ce qu'une option européenne?
 
@@ -192,6 +198,69 @@ Génère et gère le maillage triangulaire:
 5. Affichage: Tracer l'évolution temporelle de V
 ```
 
+## Méthode de Monte Carlo
+
+### Vue d'ensemble
+
+La méthode de Monte Carlo est une approche de simulation stochastique qui valorise l'option en simulant un grand nombre de trajectoires de prix possibles pour les deux actifs sous-jacents.
+
+### Principe
+
+1. **Simulation des prix** : Les prix des deux actifs à la maturité suivent un mouvement brownien géométrique corrélé (loi log-normale)
+2. **Calcul du payoff** : Pour chaque simulation, calculer le payoff de l'option
+3. **Moyenne et actualisation** : Le prix de l'option est la moyenne actualisée des payoffs
+
+### Modèle Log-Normal Corrélé
+
+Les prix des actifs évoluent selon :
+
+$$S_i(T) = S_i(0) \exp\left[\left(r - \frac{\sigma_i^2}{2}\right)T + \sigma_i\sqrt{T}Z_i\right]$$
+
+où $Z_1$ et $Z_2$ sont des variables aléatoires normales corrélées avec corrélation $\rho$.
+
+La corrélation est introduite via la décomposition de Cholesky :
+- $W_1 = Z_1$
+- $W_2 = \rho Z_1 + \sqrt{1-\rho^2}Z_2$
+
+où $Z_1$ et $Z_2$ sont des variables normales indépendantes.
+
+### Prix de l'option
+
+$$V_0 = e^{-rT} \mathbb{E}[\max(S_1(T) + S_2(T) - K, 0)]$$
+
+$$V_0 \approx e^{-rT} \frac{1}{N}\sum_{i=1}^{N} \max(S_1^{(i)}(T) + S_2^{(i)}(T) - K, 0)$$
+
+### Calcul des Greeks
+
+Les Greeks sont calculés par différences finies :
+
+- **Delta** : $\Delta_i = \frac{V(S_i + \Delta S) - V(S_i - \Delta S)}{2\Delta S}$
+- **Gamma** : $\Gamma_i = \frac{V(S_i + \Delta S) - 2V(S_i) + V(S_i - \Delta S)}{(\Delta S)^2}$
+- **Vega** : $\nu_i = \frac{V(\sigma_i + \Delta\sigma) - V(\sigma_i)}{\Delta\sigma}$
+- **Theta** : $\Theta = \frac{V(T - \Delta t) - V(T)}{\Delta t}$
+- **Rho** : $\rho_{rate} = \frac{V(r + \Delta r) - V(r)}{\Delta r}$
+
+### Techniques de réduction de variance
+
+**Variables antithétiques** : Pour chaque simulation $(Z_1, Z_2)$, on génère aussi $(-Z_1, -Z_2)$ et on moyenne les deux payoffs. Cela réduit la variance d'environ 50%.
+
+### Avantages de Monte Carlo
+
+- ✓ Flexible : facilement adaptable aux options exotiques
+- ✓ Multidimensionnel : performance constante même avec de nombreux actifs
+- ✓ Intuitive : simulation directe du processus stochastique
+- ✓ Greeks : calcul automatique par différences finies
+
+### Comparaison FEM vs Monte Carlo
+
+| Critère | Éléments Finis | Monte Carlo |
+|---------|---------------|-------------|
+| Précision | Très élevée | Dépend de N simulations |
+| Vitesse | Rapide (petit domaine) | Peut être lente |
+| Dimension | Difficile en haute dimension | Efficace en haute dimension |
+| Flexibilité | Moins flexible | Très flexible |
+| Greeks | Directs depuis la solution | Par différences finies |
+
 ## Dépendances
 
 ### Qt 5
@@ -211,7 +280,7 @@ sudo apt-get install libsfml-dev
 ```
 
 ### Compilateur C++
-Nécessite un compilateur supportant C++11 ou supérieur (g++, clang++).
+Nécessite un compilateur supportant C++17 ou supérieur (g++, clang++).
 
 ## Installation et exécution
 
@@ -225,14 +294,12 @@ qmake
 make
 ```
 
-### Exécution
+### Exécution - Méthode des Éléments Finis
 
 ```bash
-# Lancer l'application
+# Lancer l'application avec la méthode FEM (interface Qt)
 ./option-europeenne
 ```
-
-### Interface utilisateur
 
 Au lancement, une **interface Qt** permet de configurer:
 - **a**: Taille du domaine spatial [0, a] × [0, a] (défaut: 2.0)
@@ -243,24 +310,67 @@ Au lancement, une **interface Qt** permet de configurer:
 
 Après configuration, cliquez sur **"Calculate"** pour lancer la simulation.
 
+### Exécution - Méthode de Monte Carlo
+
+Pour exécuter la simulation Monte Carlo avec visualisation interactive :
+
+```bash
+# Compiler le programme Monte Carlo
+g++ -std=c++17 -o montecarlo main_montecarlo.cpp monteCarlo.cpp \
+    monteCarloVisualization.cpp -lsfml-graphics -lsfml-window -lsfml-system
+
+# Exécuter
+./montecarlo
+```
+
+Le programme demandera interactivement :
+- Prix initiaux des actifs (S1_0, S2_0)
+- Prix d'exercice (K)
+- Maturité en années (T)
+- Taux sans risque (r)
+- Volatilités (sigma1, sigma2)
+- Corrélation entre actifs (rho)
+- Nombre de simulations Monte Carlo
+
+**Paramètres suggérés pour comparaison avec FEM** :
+- S1_0 = 1.0, S2_0 = 1.0
+- K = 1.0
+- T = 2.0 années
+- r = 0.05
+- sigma1 = sigma2 = 0.2 (correspondant à variance 0.04)
+- rho = -0.6 (correspondant à covariance -0.024)
+- Simulations = 100000
+
+Le programme affiche plusieurs graphiques :
+1. **Convergence** : évolution du prix avec le nombre de simulations
+2. **Évolution temporelle** : prix de l'option à différentes maturités
+3. **Greeks** : sensibilités Delta, Gamma, Vega, Theta, Rho
+
+Pour plus de détails, voir [MONTE_CARLO_README.md](MONTE_CARLO_README.md).
+
 ### Nettoyage
 
 ```bash
 # Supprimer les fichiers compilés
 make clean
+rm -f montecarlo
 ```
 
 ## Structure du projet
 
 ```
 option-europeenne/
-├── *.cpp                  # Fichiers sources C++
-├── *.hpp                  # Fichiers d'en-tête
-├── arial.ttf              # Police pour l'affichage SFML
-├── bg.jpg                 # Image de fond pour l'interface Qt
-├── option_europeenne.pdf  # Énoncé du projet
-├── README.md              # Ce fichier
-├── Makefile               # Généré par qmake
+├── *.cpp                           # Fichiers sources C++
+├── *.hpp                           # Fichiers d'en-tête
+├── monteCarlo.cpp/hpp              # Implémentation Monte Carlo
+├── monteCarloVisualization.cpp/hpp # Visualisation Monte Carlo
+├── main_montecarlo.cpp             # Programme principal Monte Carlo
+├── arial.ttf                       # Police pour l'affichage SFML
+├── bg.jpg                          # Image de fond pour l'interface Qt
+├── option_europeenne.pdf           # Énoncé du projet
+├── README.md                       # Ce fichier
+├── MONTE_CARLO_README.md           # Documentation détaillée Monte Carlo
+├── Makefile                        # Généré par qmake
 ├── option-europeenne.pro  # Fichier de configuration Qt
 ├── bin/                   # Répertoire de l'exécutable compilé
 └── obj/                   # Fichiers objets intermédiaires
