@@ -7,3 +7,6 @@ Solution.txt
 test-sfml.cpp
 option-europeenne
 *.o
+compare_pricers
+pricing_tests
+/comparison.csv

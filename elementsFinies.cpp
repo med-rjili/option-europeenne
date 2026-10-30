@@ -1,6 +1,8 @@
 #include "elementsFinies.hpp"
 #include <vector>
 #include <fstream>
+#include <cmath>
+#include <stdexcept>
 using namespace std;
 
 
@@ -15,12 +17,11 @@ void output(string file_name,const matrice& M, const vector<double> T)
 
 vector<double> timeSlots(double t0, double tf, double dt)
 {
-    vector<double> Time;
-    int steps = (int) (tf-t0)/dt;
-    for (int i=0; i<=steps; i++) {    
-        Time.push_back(t0+i*dt);
-    }
-    if ((*Time.end())!= tf) Time.push_back(tf);
+    if (!std::isfinite(t0) || !std::isfinite(tf) || !std::isfinite(dt) || dt <= 0 || tf < t0)
+        throw std::invalid_argument("Invalid time grid");
+    vector<double> Time{t0};
+    for (int i = 1; t0 + i * dt < tf; ++i) Time.push_back(t0 + i * dt);
+    if (tf > t0) Time.push_back(tf);
     return Time;
 }
 
@@ -35,8 +36,8 @@ matrice matM_el(const Point& S1, const Point& S2, const Point& S3)
 
 
     //remplissage de la matrice M_el
-    matrice M(3,3,D/12);
-    for (int i=0; i<3; i++) M.set(i,i,D/24);
+    matrice M(3,3,D/24);
+    for (int i=0; i<3; i++) M.set(i,i,D/12);
 
     return(M);
 }
@@ -60,9 +61,9 @@ matrice A(const Point& P)
     return (0.5*mat_A);
 }
 
-Vecteur<double> V(const Point& P)
+Vecteur<double> V(const Point& P, double r)
 {
-    double r=0.05;
+
     Vecteur<double> vect_V(2); matrice C=mat_cov();
     double x=P.x, y=P.y;
     vect_V[0]= (C.val(0,0)+0.5*C.val(1,0)-r)*x;
@@ -168,7 +169,7 @@ matrice matK_el(const Point& S1, const Point& S2, const Point& S3)
     }
     return K;
 }
-matrice matB_el(const Point& S1, const Point& S2, const Point& S3)
+matrice matB_el(const Point& S1, const Point& S2, const Point& S3, double r)
 {
     matrice B(3,3);
 
@@ -197,7 +198,7 @@ matrice matB_el(const Point& S1, const Point& S2, const Point& S3)
         for (int j=0; j<3; j++){
             //Calcul de la fomule de quadrature a 4 points
             for(int k=0; k<4; k++){
-                B.set(i,j,B.val(i,j)+ c_hat[k]*(V(S_hat_trans[k])|Grad_W.getRow(j))* W.val(k,i)*(abs_det_Bl/D)) ;
+                B.set(i,j,B.val(i,j)+ 0.5*c_hat[k]*(V(S_hat_trans[k], r)|Grad_W.getRow(j))* W.val(k,i)*(abs_det_Bl/D)) ;
             }
         }
     }

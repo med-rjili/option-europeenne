@@ -19,8 +19,8 @@ class Maillage{
         Maillage(int m, int n); // pas du découpage sur l'abscisse
         void Maillage_carre();
         void print() const;
-        Maillage(int a,int b,int c,int d,int m,int n);
-        void Maillage_rectangle(int a, int b,int c,int d);
+        Maillage(double a,double b,double c,double d,int m,int n);
+        void Maillage_rectangle(double a, double b,double c,double d);
         void Save (const char *fn) const;
 
 

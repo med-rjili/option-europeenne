@@ -92,14 +92,8 @@ matrice &matrice::operator+=(const matrice &mat)
 
 matrice &matrice::operator*=(const double alpha)
 {
-    for (auto &entry : data)
-    {
-        entry.second *= alpha;
-        if (entry.second == 0.0)
-        {
-            data.erase(entry.first);
-        }
-    }
+    if (alpha == 0.0) data.clear();
+    else for (auto &entry : data) entry.second *= alpha;
     return *this;
 }
 

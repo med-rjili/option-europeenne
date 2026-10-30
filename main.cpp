@@ -9,14 +9,15 @@
 #include "elementsFinies.hpp"
 #include "vecteur.hpp"
 #include "utils.hpp"
+#include "pricing.hpp"
 
 const double HEIGHT=900;
 const double WIDTH=1200;
 
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]) try {
 
-    int m = 10, n = 10;
+    int m = 40;
     double a = 2.0;
     double r = 0.05;
     double K_ = 1;
@@ -24,97 +25,37 @@ int main(int argc, char *argv[]){
     double dt = 3;
 
     createQtInterface(argc, argv, &a, &r, &K_, &T, &dt);
-    //constexpr double nbr_pas = T / dt;
-
-    // Creation du maillage
-    //std::cout << "Creation du maillage:";
-    Maillage mc(0, a, 0, a, m, n);
-    mc.Save("Maillage.txt");
-    long int Nbpts = mc.points.size(), Nbtri = mc.triangles.size();
-    std::vector<Point> Coorneu = mc.points;
-    std::vector<Triangle> Numtri = mc.triangles;
-
-    matrice M(Nbpts, Nbpts);
-    matrice K(Nbpts, Nbpts);
-    matrice B(Nbpts, Nbpts);
-
-    for (int l = 0; l < Nbtri; l++)
-    {
-        //double r = (1.0 * l / Nbtri) * 100;
-        //std::cout << "\rCalcul des matrices elements fini:" << round(r) <<"%"<< std::flush;
-        Point S1 = Coorneu[Numtri[l].s1];
-        Point S2 = Coorneu[Numtri[l].s2];
-        Point S3 = Coorneu[Numtri[l].s3];
-
-        // Calcul des matrices elementaires M_el, K_el, B_el
-        matrice M_el, K_el, B_el;
-        M_el = matM_el(S1, S2, S3);
-        K_el = matK_el(S1, S2, S3);
-        B_el = matB_el(S1, S2, S3);
-
-        // Remplissage des matrices M, K, B
-        for (int i = 0; i < M_el.getNbRows(); i++)
-        {
-            int I = Numtri[l].getS(i + 1);
-            for (int j = 0; j < M_el.getNbCols(); j++)
-            {
-                int J = Numtri[l].getS(j + 1);
-                M.set(I, J, M.val(I, J) + M_el.val(i, j));
-                K.set(I, J, K.val(I, J) + K_el.val(i, j));
-                B.set(I, J, B.val(I, J) + B_el.val(i, j));
-            }
-        }
+    if (!std::isfinite(T) || !std::isfinite(dt) || T <= 0 || dt <= 0 || T/dt > 1000000)
+        throw std::invalid_argument("T and dt must be positive finite days; at most 1000000 steps");
+    PricingParameters parameters;
+    parameters.s1 = parameters.s2 = a/4; // A fixed mesh node throughout the curve.
+    parameters.strike = K_;
+    parameters.rate = r;
+    parameters.maturity = T/365.0;
+    const int time_steps = static_cast<int>(std::ceil(T/dt));
+    std::vector<Vecteur<double>> history;
+    const auto solution = priceFiniteElements(parameters, a, m, time_steps, &history);
+    const auto mc = priceMonteCarlo(parameters);
+    const double fe = solution.priceAt(parameters.s1, parameters.s2);
+    std::cout << std::setprecision(10)
+              << "Spots: " << parameters.s1 << ", " << parameters.s2
+              << "\nFEM: " << fe << "\nMonte Carlo: " << mc.price
+              << "\nMC 95% CI: [" << mc.ci_low << ", " << mc.ci_high << "]"
+              << "\nFEM - MC: " << fe-mc.price << std::endl;
+    solution.mesh.Save("Maillage.txt");
+    matrice P(static_cast<int>(history.size()), static_cast<int>(solution.mesh.points.size()));
+    std::vector<double> time, data;
+    const int spot_index = (m/4)*(m+1)+m/4;
+    for (std::size_t i=0; i<history.size(); ++i) {
+        time.push_back(T*i/time_steps); // Display days; solver uses years.
+        data.push_back(history[i][spot_index]);
+        P.setRow(static_cast<int>(i), history[i]);
     }
-    //cout<<"\n";
-
-    // Shema numerique
-    std::vector<double> Time = timeSlots(0, T, dt);
-    int steps = Time.size();
-    matrice P(steps, Nbpts);
-    Vecteur<double> Q_0(Nbpts, 0);
-    for (int l = 0; l < Nbpts; l++)
-    {
-        Point P = Coorneu[l];
-        double x1 = P.x, x2 = P.y;
-        Q_0[l] = (x1 + x2 - K_ > 0) ? x1 + x2 - K_ : 0;
-    }
-
-    matrice D = r * M + K + B;
-
-    P.setRow(0, Q_0);
-    // Create a window
-    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "SFML Graph");
-    int t=1;
-    while (window.isOpen() and t<steps){
-        //double r = (double(t + 1) / steps) * 100;
-        //std::cout << "\rCalcul du schema numerique:" << round(r) << "%" <<  std::flush;
-        drawProgressBar(window,t, steps);
-        P.setRow(t, resoudre((M + (dt / 2) * D), (M - (dt / 2) * D) * P.getRow(t - 1)));
-        t++;
-    }
-    //cout<<"\n";
-    window.clear();
-    mc.Save("Maillage.txt");
-    output("Solution.txt", P, Time);
-
-    // Example data for time axis and data values
-    std::vector<double> time = Time;
-    std::vector<double> data;
-    unsigned long nb=0;
-    for (int i = 0; i < P.getNbRows(); i++)
-    {
-        for (int j = 0; j < P.getNbCols(); j++)
-        {
-            if (nb==time.size()) break;
-            if(P(i,j)>0 ) data.push_back(log(P(i, j)));
-            else if(P(i,j)<0) data.push_back(-log(-P(i,j)));
-            else data.push_back(0); 
-            nb++;
-        }
-    }
+    output("Solution.txt", P, time);
+    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "FEM price vs time to maturity (days); MC comparison in terminal");
 
 
-    double maxi_data = max(data);
+    double maxi_data = std::max(max(data), 1e-8);
     double maxi_time=max(time);
 
     sf::CircleShape point(3); // Radius of 3 pixels
@@ -241,4 +182,9 @@ int main(int argc, char *argv[]){
     }
 
     return 0;
+}
+
+catch (const std::exception& e) {
+    std::cerr << "Pricing error: " << e.what() << std::endl;
+    return 1;
 }
