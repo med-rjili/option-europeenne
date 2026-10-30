@@ -1,0 +1,2 @@
+s1,s2,strike,rate,maturity_years,domain,mesh,steps,pairs,seed,fem,mc,mc_se,ci_low,ci_high,fem_minus_mc,absolute_gap,relative_gap,inside_mc_ci,fem_seconds,mc_seconds
+0.5,0.5,1,0.05,2,2,120,244,500000,42,0.111459235861,0.111506018632,7.497749478e-05,0.111359065442,0.111652971821,-4.67827701248e-05,4.67827701248e-05,0.000419553766684,1,3.620852076,0.047818212

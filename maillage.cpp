@@ -24,10 +24,10 @@ void Maillage::Maillage_carre(){
     }
     
 }
-Maillage::Maillage(int a,int b,int c,int d,int m, int n):dimH(m+1),dimV(n+1){
+Maillage::Maillage(double a,double b,double c,double d,int m, int n):dimH(m+1),dimV(n+1){
     Maillage_rectangle(a,b,c,d);
 }
-void Maillage::Maillage_rectangle(int a,int b,int c,int d){
+void Maillage::Maillage_rectangle(double a,double b,double c,double d){
     Maillage_carre();
     for(unsigned long i=0;i<points.size();i++)
     {
