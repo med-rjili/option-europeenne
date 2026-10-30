@@ -165,6 +165,25 @@ Pour reproduire :
 ./compare_pricers --mesh 80 --steps 488 --output results/time488.csv
 ```
 
+### Graphique comparatif
+
+![Convergence du prix par éléments finis vers l’estimation Monte-Carlo et intervalle de confiance à 95 %](docs/images/comparison_fem_mc.png)
+
+La courbe bleue représente les prix EF pour 20, 40, 80 et 120 subdivisions par axe.
+La ligne verte est la même estimation Monte-Carlo pour tous les maillages ; la
+bande verte représente son intervalle de confiance à 95 %. Les résultats EF
+entrent dans cette bande à partir de 80 subdivisions. À 120 subdivisions, l’écart
+relatif observé est de **0,042 %**. L’axe vertical est resserré pour rendre les
+écarts visibles. La bande ne représente pas l’erreur numérique de la méthode EF.
+
+Le graphique est généré à partir des fichiers `results/mesh*.csv`, sans relancer
+les simulations. Pour le reproduire (Python et Matplotlib, facultatifs pour le pricer C++) :
+
+```bash
+python -m pip install matplotlib
+python scripts/plot_comparison.py
+```
+
 ## Modèle et Monte-Carlo
 
 Sous la probabilité risque-neutre :
